@@ -1,4 +1,6 @@
-use anyhow::{self, Error};
+mod ota_fns;
+
+use anyhow::{self};
 use embedded_svc::wifi::{AuthMethod, ClientConfiguration, Configuration};
 use esp_idf_hal::peripherals::Peripherals;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
@@ -32,6 +34,10 @@ fn main() -> anyhow::Result<()> {
     }
 
     println!("Connected");
+
+
+    ota_fns::my_ota::ota_update_handler()?;
+
     Ok(())
 
 }
