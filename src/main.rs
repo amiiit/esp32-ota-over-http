@@ -6,12 +6,13 @@ use esp_idf_hal::peripherals::Peripherals;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use esp_idf_svc::nvs::EspDefaultNvsPartition;
 use esp_idf_svc::wifi::EspWifi;
+use log::info;
 
 fn main() -> anyhow::Result<()> {
     esp_idf_svc::sys::link_patches();
     esp_idf_svc::log::EspLogger::initialize_default();
+    info!("!!!IMAGE TWO!!!");
 
-    log::info!("WiFi Starting");
     let peripherals = Peripherals::take().unwrap();
     let sysloop = EspSystemEventLoop::take()?;
     let nvs = EspDefaultNvsPartition::take()?;
@@ -27,10 +28,10 @@ fn main() -> anyhow::Result<()> {
     wifi.start()?;
     wifi.connect()?;
 
+    let config = wifi.get_configuration().unwrap();
+    println!("Waiting for station {:?}", config);
     while !wifi.is_connected().unwrap() {
         // Get and print connetion configuration
-        let config = wifi.get_configuration().unwrap();
-        println!("Waiting for station {:?}", config);
     }
 
     println!("Connected");

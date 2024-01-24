@@ -11,7 +11,7 @@ pub mod my_ota {
         let mut content_length: usize = 0;
         let mut body: [u8; BUF_MAX] = [0; BUF_MAX];
 
-        let firmware_url = "https://storage.googleapis.com/devices/blinky-ota";
+        let firmware_url = "https://storage.googleapis.com/devices/image.bin";
         info!("Will use firmware from: {}", firmware_url);
 
         let mut ota = EspOta::new().expect("EspOta::new should have been successful");
