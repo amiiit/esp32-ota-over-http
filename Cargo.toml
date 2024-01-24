@@ -13,6 +13,9 @@ opt-level = "s"
 debug = true    # Symbols are nice and they don't increase the size on Flash
 opt-level = "z"
 
+[package.metadata.espflash]
+partition_table = "partitions.csv" # Supports CSV and binary formats
+
 [features]
 default = ["std", "embassy", "esp-idf-svc/native"]
 
