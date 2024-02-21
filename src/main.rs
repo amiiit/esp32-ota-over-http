@@ -1,4 +1,4 @@
-mod ota_fns;
+mod my_ota;
 
 use anyhow::{self};
 use embedded_svc::wifi::{AuthMethod, ClientConfiguration, Configuration};
@@ -35,10 +35,7 @@ fn main() -> anyhow::Result<()> {
     }
 
     println!("Connected");
-
-
-    ota_fns::my_ota::ota_update_handler()?;
-
+    my_ota::my_ota::ota_update_handler(env!("VERSION"), env!("VERSION"))?;
     Ok(())
 
 }
