@@ -6,6 +6,7 @@ use esp_idf_hal::peripherals::Peripherals;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use esp_idf_svc::nvs::EspDefaultNvsPartition;
 use esp_idf_svc::wifi::EspWifi;
+use log::{error, info};
 
 fn main() -> anyhow::Result<()> {
     esp_idf_svc::sys::link_patches();
@@ -34,6 +35,22 @@ wifi.set_configuration(&Configuration::Client(ClientConfiguration {
     }
 
     println!("Connected");
-    my_ota::my_ota::ota_update_handler(env!("CARGO_PKG_VERSION"), "device_id")?;
+    match my_ota::my_ota::do_update_if_available(env!("CARGO_PKG_VERSION"), "device_id") {
+        Ok(did_update) => {
+            if did_update.unwrap() {
+                esp_idf_hal::delay::FreeRtos::delay_ms(1000);
+                info!("Restarting device after firmware update");
+                unsafe {
+                    esp_idf_sys::esp_restart();
+                }
+            } else {
+                info!("Did not update firmware");
+            }
+        },
+        Err(e) => {
+            error!("Error fetching or installing update {}", e);
+        }
+    }
+
     Ok(())
 }

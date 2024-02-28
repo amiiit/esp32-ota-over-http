@@ -30,23 +30,25 @@ pub mod my_ota {
         }
 
         let mut target_version_body = [0; TARGET_VERSION_MAX_LENGTH];
-        let target_version_bytesread = client.read(&mut target_version_body)?;
+        client.read(&mut target_version_body)?;
 
-        let result = String::from_utf8(target_version_body[..target_version_bytesread].to_vec())
-            .map_err(|err| anyhow::Error::new(err))?;
-
-        Ok(result)
-    }
-
-    pub fn do_update_if_available(current_version: &str, device_id: &str) -> anyhow::Result<()> {
-        match fetch_target_firmware_version(device_id) {
-            Ok(target_version) => Ok(()),
-            Err(target_version) => Err(anyhow::Error::msg("couldnt get version"))
+        match std::str::from_utf8(&target_version_body) {
+            Ok(body) => Ok(String::from(body)),
+            Err(e) => Err(anyhow::Error::new(e))
         }
-
     }
 
-    pub fn ota_update_handler(current_version: &str, device_id: &str) -> anyhow::Result<()> {
+    pub fn do_update_if_available(current_version: &str, device_id: &str) -> Result<Option<bool>, anyhow::Error> {
+        let target_version = fetch_target_firmware_version(device_id)?;
+        if current_version == target_version {
+            Ok(Some(false))
+        } else {
+            ota_update_handler(target_version)?;
+            return Ok(Some(true));
+        }
+    }
+
+    pub fn ota_update_handler(target_version: String) -> anyhow::Result<()> {
         info!("Start processing OTA update");
 
         const BUF_MAX: usize = 2 * 1024;
@@ -103,11 +105,6 @@ pub mod my_ota {
             return Err(anyhow::Error::msg("Firmware update failed"));
         }
 
-        esp_idf_hal::delay::FreeRtos::delay_ms(1000);
-        info!("Restarting device after firmware update");
-        unsafe {
-            esp_idf_sys::esp_restart();
-        }
 
         Ok(())
     }
