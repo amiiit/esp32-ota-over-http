@@ -16,14 +16,14 @@ fn main() -> anyhow::Result<()> {
     let sysloop = EspSystemEventLoop::take()?;
     let nvs = EspDefaultNvsPartition::take()?;
 
-let mut wifi = EspWifi::new(peripherals.modem, sysloop, Some(nvs))?;
+    let mut wifi = EspWifi::new(peripherals.modem, sysloop, Some(nvs))?;
 
-wifi.set_configuration(&Configuration::Client(ClientConfiguration {
-    ssid: "brisa".try_into().unwrap(),
-    password: "kalicanelo".try_into().unwrap(),
-    auth_method: AuthMethod::None,
-    ..Default::default()
-}))?;
+    wifi.set_configuration(&Configuration::Client(ClientConfiguration {
+        ssid: "brisa".try_into().unwrap(),
+        password: "kalicanelo".try_into().unwrap(),
+        auth_method: AuthMethod::None,
+        ..Default::default()
+    }))?;
 
     wifi.start()?;
     wifi.connect()?;
@@ -46,7 +46,7 @@ wifi.set_configuration(&Configuration::Client(ClientConfiguration {
             } else {
                 info!("Did not update firmware");
             }
-        },
+        }
         Err(e) => {
             error!("Error fetching or installing update {}", e);
         }
