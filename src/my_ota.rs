@@ -54,7 +54,7 @@ pub mod my_ota {
         const BUF_MAX: usize = 2 * 1024;
         let mut body = [0; BUF_MAX];
 
-        let firmware_url = "https://storage.googleapis.com/devices/image.bin";
+        let firmware_url = format!("https://storage.googleapis.com/devices/images/{}/image.bin", target_version);
         info!("Using firmware from: {}", firmware_url);
 
         let mut ota = EspOta::new()?;
@@ -66,7 +66,7 @@ pub mod my_ota {
             ..Default::default()
         })?;
 
-        let _resp = client.initiate_request(Method::Get, firmware_url, &[]);
+        let _resp = client.initiate_request(Method::Get, &firmware_url, &[]);
         client.initiate_response()?;
 
         let content_length = client.header("Content-Length")
