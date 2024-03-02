@@ -70,17 +70,34 @@ pub mod my_ota {
         const BUF_MAX: usize = 2 * 1024;
         let mut body = [0; BUF_MAX];
 
+        error!("Just trying the error macro");
         let firmware_url = format!("https://storage.googleapis.com/devices/images/{}/image.bin", target_version);
-        info!("Using firmware from: {}", firmware_url);
+        info!("Using firmware from: [[{}]]", firmware_url);
 
-        let mut ota = EspOta::new()?;
-        let mut ota_update = ota.initiate_update()?;
+        let mut ota = match EspOta::new(){
+            Ok(ota) => ota,
+            Err(err) => {
+                error!("Error instantiating EspOta: {}", err);
+                return Err(anyhow::Error::new(err))
+            }
+        };
+        info!("Instantiated EspOta");
+        let mut ota_update = match ota.initiate_update(){
+            Ok(ou) => ou,
+            Err(err) => {
+                error!("Error initiating OTA update: {}", err);
+                return Err(anyhow::Error::new(err));
+            }
+        };
 
+        info!("ESP OTA resources initiated");
         let mut client = EspHttpConnection::new(&Configuration {
             crt_bundle_attach: Some(esp_idf_sys::esp_crt_bundle_attach),
             buffer_size: Some(BUF_MAX),
             ..Default::default()
         })?;
+
+        info!("Will initiate request to download firmware");
 
         let _resp = client.initiate_request(Method::Get, &firmware_url, &[]);
         client.initiate_response()?;

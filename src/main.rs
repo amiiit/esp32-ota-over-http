@@ -37,6 +37,7 @@ fn main() -> anyhow::Result<()> {
     loop {
         match my_ota::my_ota::do_update_if_available(VERSION, "device_id") {
             Ok(did_update) => {
+                info!("Update was successful");
                 if did_update.unwrap() {
                     esp_idf_hal::delay::FreeRtos::delay_ms(1000);
                     info!("Restarting device after firmware update");
