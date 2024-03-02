@@ -104,7 +104,6 @@ pub mod my_ota {
             return Err(anyhow::Error::msg("Firmware update failed"));
         }
 
-
         Ok(())
     }
 }
