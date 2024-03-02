@@ -37,20 +37,22 @@ fn main() -> anyhow::Result<()> {
     }
     println!("WiFi connection established");
 
-    match my_ota::my_ota::do_update_if_available(VERSION, "device_id") {
-        Ok(did_update) => {
-            if did_update.unwrap() {
-                esp_idf_hal::delay::FreeRtos::delay_ms(1000);
-                info!("Restarting device after firmware update");
-                unsafe {
-                    esp_idf_sys::esp_restart();
+    loop {
+        match my_ota::my_ota::do_update_if_available(VERSION, "device_id") {
+            Ok(did_update) => {
+                if did_update.unwrap() {
+                    esp_idf_hal::delay::FreeRtos::delay_ms(1000);
+                    info!("Restarting device after firmware update");
+                    unsafe {
+                        esp_idf_sys::esp_restart();
+                    }
+                } else {
+                    info!("Did not update firmware");
                 }
-            } else {
-                info!("Did not update firmware");
             }
-        }
-        Err(e) => {
-            error!("Error fetching or installing update {}", e);
+            Err(e) => {
+                error!("Error fetching or installing update {}", e);
+            }
         }
     }
 

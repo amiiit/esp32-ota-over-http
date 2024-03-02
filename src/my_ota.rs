@@ -1,7 +1,7 @@
 pub mod my_ota {
     use esp_idf_svc::http::client::{Configuration, EspHttpConnection};
     use esp_idf_svc::ota::EspOta;
-    use log::info;
+    use log::{info, warn, error};
     use embedded_svc::http::Method;
 
     const BUF_MAX: usize = 2048;
@@ -17,7 +17,14 @@ pub mod my_ota {
         let device_specific_url = format!("https://storage.googleapis.com/devices/{}/target", device_id);
         info!("Requesting target version via device-specific URL: {}", device_specific_url);
 
-        let resp = client.initiate_request(Method::Get, &device_specific_url, &[])?;
+        match client.initiate_request(Method::Get, &device_specific_url, &[]) {
+            Ok(res) => (),
+            Err(e) => {
+                warn!("Error initiating request to get device specific URL: {}", e);
+                return Err(anyhow::Error::new(e))
+            }
+        };
+
         client.initiate_response()?;
 
         // let content_length = client.header("Content-Length")?;
