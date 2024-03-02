@@ -17,9 +17,8 @@ pub mod my_ota {
         let device_specific_url = format!("https://storage.googleapis.com/devices/{}/target", device_id);
         info!("Requesting target version via device-specific URL: {}", device_specific_url);
 
-        let _resp = client.initiate_request(Method::Get, &device_specific_url, &[]);
+        let resp = client.initiate_request(Method::Get, &device_specific_url, &[])?;
         client.initiate_response()?;
-
 
         // let content_length = client.header("Content-Length")?;
 

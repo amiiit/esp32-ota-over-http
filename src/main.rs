@@ -11,7 +11,9 @@ use log::{error, info};
 fn main() -> anyhow::Result<()> {
     esp_idf_svc::sys::link_patches();
     esp_idf_svc::log::EspLogger::initialize_default();
+    const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+    println!("Starting version {}", VERSION);
     let peripherals = Peripherals::take().unwrap();
     let sysloop = EspSystemEventLoop::take()?;
     let nvs = EspDefaultNvsPartition::take()?;
@@ -29,13 +31,13 @@ fn main() -> anyhow::Result<()> {
     wifi.connect()?;
 
     let config = wifi.get_configuration().unwrap();
-    println!("Waiting for station {:?}", config);
+    println!("Waiting for WiFi connection {:?}", config);
     while !wifi.is_connected().unwrap() {
         // Get and print connetion configuration
     }
+    println!("WiFi connection established");
 
-    println!("Connected");
-    match my_ota::my_ota::do_update_if_available(env!("CARGO_PKG_VERSION"), "device_id") {
+    match my_ota::my_ota::do_update_if_available(VERSION, "device_id") {
         Ok(did_update) => {
             if did_update.unwrap() {
                 esp_idf_hal::delay::FreeRtos::delay_ms(1000);
