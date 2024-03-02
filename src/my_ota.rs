@@ -21,7 +21,7 @@ pub mod my_ota {
             Ok(res) => (),
             Err(e) => {
                 warn!("Error initiating request to get device specific URL: {}", e);
-                return Err(anyhow::Error::new(e))
+                return Err(anyhow::Error::new(e));
             }
         };
 
@@ -36,16 +36,26 @@ pub mod my_ota {
         }
 
         let mut target_version_body = [0; TARGET_VERSION_MAX_LENGTH];
-        client.read(&mut target_version_body)?;
+        let response_length = client.read(&mut target_version_body)?;
+        info!("Response length is: {}", response_length);
 
         match std::str::from_utf8(&target_version_body) {
-            Ok(body) => Ok(String::from(body)),
+            Ok(body) => {
+                // Drop last character which is a newline
+                Ok(String::from(&body[..response_length - 1]))
+            }
             Err(e) => Err(anyhow::Error::new(e))
         }
     }
 
     pub fn do_update_if_available(current_version: &str, device_id: &str) -> Result<Option<bool>, anyhow::Error> {
-        let target_version = fetch_target_firmware_version(device_id)?;
+        let target_version = match fetch_target_firmware_version(device_id) {
+            Ok(version) => version,
+            Err(err) => {
+                error!("Error fetching firmware version: {err}");
+                return Err(err);
+            }
+        };
         if current_version == target_version {
             Ok(Some(false))
         } else {

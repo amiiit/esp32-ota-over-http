@@ -19,24 +19,21 @@ fn main() -> anyhow::Result<()> {
     let nvs = EspDefaultNvsPartition::take()?;
 
     let mut wifi = EspWifi::new(peripherals.modem, sysloop, Some(nvs))?;
-
     wifi.set_configuration(&Configuration::Client(ClientConfiguration {
         ssid: "brisa".try_into().unwrap(),
         password: "kalicanelo".try_into().unwrap(),
         auth_method: AuthMethod::None,
         ..Default::default()
     }))?;
-
     wifi.start()?;
     wifi.connect()?;
 
     let config = wifi.get_configuration().unwrap();
     println!("Waiting for WiFi connection {:?}", config);
-    while !wifi.is_connected().unwrap() {
+    while !wifi.is_connected().unwrap() || !wifi.is_up().unwrap() {
         // Get and print connetion configuration
     }
     println!("WiFi connection established");
-
     loop {
         match my_ota::my_ota::do_update_if_available(VERSION, "device_id") {
             Ok(did_update) => {
